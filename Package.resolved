@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "ViewBlocking",
+        "repositoryURL": "https://github.com/star-s/ViewBlocking",
+        "state": {
+          "branch": null,
+          "revision": "cd7c1f00134a026fc3f35ac04006084398e8892c",
+          "version": "0.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
