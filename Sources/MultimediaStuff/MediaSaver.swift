@@ -24,6 +24,12 @@ public enum ImageVariant {
     case image(UIImage)
     case imageWithMetadata(UIImage, [CFString : Any])
     
+    public static func variant(for info: [UIImagePickerController.InfoKey : Any]) -> ImageVariant {
+        let image = info[.originalImage] as! UIImage
+        let metadata = info[.mediaMetadata] as! [CFString : Any]
+        return .imageWithMetadata(image, metadata)
+    }
+
     var cgImage: CGImage {
         switch self {
         case .image(let image), .imageWithMetadata(let image, _):
