@@ -46,6 +46,9 @@ open class ImageViewController: UIViewController {
                 case .success(let image):
                     self.hostView?.zoomView = UIImageView(image: image)
                 case .failure(let error):
+                    if let image = self.imageFetcher.imageProvider.placeholder(for: error) {
+                        self.hostView?.zoomView = UIImageView(image: image)
+                    }
                     print(error)
                 }
             }

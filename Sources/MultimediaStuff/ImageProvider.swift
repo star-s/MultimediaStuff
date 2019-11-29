@@ -11,7 +11,7 @@ import UIKit
 public protocol ImageProvider {
     func image(from cachedResponse: CachedURLResponse) -> UIImage
     func image(from imageData: Data, response: URLResponse) -> UIImage
-    func placeholder(for error: Error, response: URLResponse?) -> UIImage?
+    func placeholder(for error: Error) -> UIImage?
 }
 
 extension ImageProvider {
@@ -20,7 +20,7 @@ extension ImageProvider {
         image(from: cachedResponse.data, response: cachedResponse.response)
     }
     
-    public func placeholder(for error: Error, response: URLResponse?) -> UIImage? {
+    public func placeholder(for error: Error) -> UIImage? {
         nil
     }
 }

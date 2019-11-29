@@ -36,13 +36,7 @@ public extension ImageLoader {
             progress.completedUnitCount = 1
             DispatchQueue.main.async {
                 if let error = error {
-                    if (error as? URLError)?.code == .cancelled {
-                        completion(.failure(error))
-                    } else if let image = provider.placeholder(for: error, response: response) {
-                        completion(.success(image))
-                    } else {
-                        completion(.failure(error))
-                    }
+                    completion(.failure(error))
                 } else if let imageData = data, let response = response {
                     completion(.success(provider.image(from: imageData, response: response)))
                 } else {

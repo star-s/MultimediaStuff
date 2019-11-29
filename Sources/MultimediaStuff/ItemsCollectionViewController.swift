@@ -62,6 +62,9 @@ open class ItemsCollectionViewController: UICollectionViewController, UICollecti
                 case .success(let image):
                     cell?.imageView?.image = image
                 case .failure(let error):
+                    if let image = self.imageFetcher.imageProvider.placeholder(for: error) {
+                        cell?.imageView?.image = image
+                    }
                     //cell?.presentError(error)
                     print(error)
                 }
