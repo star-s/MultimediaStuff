@@ -17,13 +17,6 @@ open class ImageViewController: UIViewController {
     
     var hostView: ImageScrollView? { view as? ImageScrollView }
     
-    var request: URLRequest {
-        if let fullScreenItem = mediaItem as? FullScreenMediaItem {
-            return URLRequest(url: fullScreenItem.fullScreen)
-        }
-        return URLRequest(url: mediaItem.source)
-    }
-
     required public init(_ item: MediaItem) {
         mediaItem = item
         super.init(nibName: nil, bundle: nil)
@@ -39,6 +32,7 @@ open class ImageViewController: UIViewController {
     
     override public func viewDidLoad() {
         super.viewDidLoad()
+        let request = URLRequest(url: mediaItem.source)
         switch imageFetcher.start(fetching: request) {
         case .inProgress(let progress):
             imageFetcher.addFinishWork(request: request) { (result) in

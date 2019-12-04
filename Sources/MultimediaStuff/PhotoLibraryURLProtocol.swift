@@ -12,22 +12,6 @@ import UIKit
 @available(iOS 10.0, *)
 public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
     
-    enum ResultType {
-        case fullResolutionImage
-        case fullScreenImage
-        case thumbnail
-    }
-    
-    enum Fragment: String {
-        case thumbnail
-        case fullscreen
-        
-        init?(_ fragment: String? = nil) {
-            guard let fragment = fragment else { return nil }
-            self.init(rawValue: fragment)
-        }
-    }
-    
     enum Parameter: String {
         case id
         case ext
@@ -41,6 +25,7 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
     }
     
     static public let scheme = "assets-library"
+    static public let thumbnailFragment = "thumbnail"
     
     var requestId: PHImageRequestID? = nil
     
@@ -55,28 +40,6 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
     override public class func canInit(with task: URLSessionTask) -> Bool {
         guard let scheme = task.currentRequest?.url?.scheme else { return false }
         return scheme == PhotoLibraryURLProtocol.scheme
-    }
-    
-    var resultType: ResultType {
-        guard let url = request.url, let fragment = Fragment(url.fragment) else { return .fullResolutionImage }
-        switch fragment {
-        case .thumbnail:
-            return .thumbnail
-        case .fullscreen:
-            return .fullScreenImage
-        }
-    }
-    
-    var resultSize: CGSize {
-        switch resultType {
-        case .thumbnail:
-            let scale = UIScreen.main.scale
-            return CGSize(width: 75 * scale, height: 75 * scale)
-        case .fullScreenImage:
-            return UIScreen.main.bounds.size
-        default:
-            return .zero
-        }
     }
     
     var assetLocalId: String {
@@ -105,12 +68,13 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
         }
         DispatchQueue.global().async {
             if let asset = PHAsset.fetchAssets(withLocalIdentifiers: [self.assetLocalId], options: nil).firstObject {
-                switch self.resultType {
-                case .thumbnail, .fullScreenImage:
-                    self.requestId = self.manager.requestImage(for: asset, targetSize: self.resultSize, contentMode: .aspectFill, options: self.options, resultHandler: { (image, info) in
+                if self.request.url?.fragment == PhotoLibraryURLProtocol.thumbnailFragment {
+                    let scale = UIScreen.main.scale
+                    let size = CGSize(width: 75 * scale, height: 75 * scale)
+                    self.requestId = self.manager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: self.options, resultHandler: { (image, info) in
                         self.handle(image: image, info: info)
                     })
-                default:
+                } else {
                     self.requestId = self.manager.requestImageData(for: asset, options: self.options, resultHandler: { (data, uti, orientation, info) in
                         self.handle(imageData: data, dataUTI: uti, orientation: orientation, info: info)
                     })
@@ -128,7 +92,7 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
         }
     }
     
-    func handle(image: UIImage?, info:[AnyHashable: Any]?) {
+    func handle(image: UIImage?, info: [AnyHashable: Any]?) {
         guard let info = info as? [String : Any] else { fatalError() }
         if let isRequestCancelled = info[PHImageCancelledKey] as? Bool, isRequestCancelled {
             return

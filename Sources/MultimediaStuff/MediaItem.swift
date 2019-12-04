@@ -27,10 +27,6 @@ public extension MediaItem {
     var thumbnail: URL { source }
 }
 
-public protocol FullScreenMediaItem: MediaItem {
-    var fullScreen: URL { get }
-}
-
 // MARK: - Collection of multimedia items
 
 public protocol MediaItemsCollection {
@@ -54,7 +50,7 @@ import Photos
 import UIKit
 
 @available(iOS 10.0, *)
-public enum PhotoLibraryItem: FullScreenMediaItem {
+public enum PhotoLibraryItem: MediaItem {
     case url(URL)
     case asset(PHAsset)
     
@@ -69,15 +65,13 @@ public enum PhotoLibraryItem: FullScreenMediaItem {
     }
     
     public var thumbnail: URL {
-        var components = URLComponents(url: source, resolvingAgainstBaseURL: false)!
-        components.fragment = PhotoLibraryURLProtocol.Fragment.thumbnail.rawValue
-        return components.url!
-    }
-    
-    public var fullScreen: URL {
-        var components = URLComponents(url: source, resolvingAgainstBaseURL: false)!
-        components.fragment = PhotoLibraryURLProtocol.Fragment.fullscreen.rawValue
-        return components.url!
+        if var components = URLComponents(url: source, resolvingAgainstBaseURL: false) {
+            components.fragment = PhotoLibraryURLProtocol.thumbnailFragment
+            if let url = components.url {
+                return url
+            }
+        }
+        fatalError()
     }
 }
 
