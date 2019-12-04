@@ -92,7 +92,7 @@ open class ItemsCollectionViewController: UICollectionViewController, UICollecti
     
     // MARK: -
     
-    public func request(at indexPath: IndexPath) -> URLRequest? {
+    open func request(at indexPath: IndexPath) -> URLRequest? {
         guard let sections = sections else { return nil }
         return URLRequest(url: sections[indexPath.section].items[indexPath.item].thumbnail)
     }

@@ -37,10 +37,10 @@ public extension ImageLoader {
             DispatchQueue.main.async {
                 if let error = error {
                     completion(.failure(error))
-                } else if let imageData = data, let response = response {
-                    completion(.success(provider.image(from: imageData, response: response)))
+                } else if let imageData = data, let response = response, let image = provider.image(from: imageData, response: response) {
+                    completion(.success(image))
                 } else {
-                    fatalError("Unexpected response")
+                    completion(.failure(URLError(.resourceUnavailable)))
                 }
             }
         }
