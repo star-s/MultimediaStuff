@@ -63,21 +63,20 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
     
     override public func startLoading() {
         clientThread = .current
-        if let cached = cachedResponse {
-            //print(cached)
-        }
         DispatchQueue.global().async {
             if let asset = PHAsset.fetchAssets(withLocalIdentifiers: [self.assetLocalId], options: nil).firstObject {
                 if self.request.url?.fragment == PhotoLibraryURLProtocol.thumbnailFragment {
                     let scale = UIScreen.main.scale
                     let size = CGSize(width: 75 * scale, height: 75 * scale)
-                    self.requestId = self.manager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: self.options, resultHandler: { (image, info) in
-                        self.handle(image: image, info: info)
-                    })
+                    self.requestId = self.manager.requestImage(for: asset,
+                                                               targetSize: size,
+                                                               contentMode: .aspectFill,
+                                                               options: self.options,
+                                                               resultHandler: { self.handleThumbnail($0, info: $1) })
                 } else {
-                    self.requestId = self.manager.requestImageData(for: asset, options: self.options, resultHandler: { (data, uti, orientation, info) in
-                        self.handle(imageData: data, dataUTI: uti, orientation: orientation, info: info)
-                    })
+                    self.requestId = self.manager.requestImageData(for: asset,
+                                                                   options: self.options,
+                                                                   resultHandler: { self.handleImageData($0, UTI: $1, orientation: $2, info: $3) })
                 }
             } else {
                 self.didFinishLoading(error: URLError(.resourceUnavailable))
@@ -92,7 +91,7 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
         }
     }
     
-    func handle(image: UIImage?, info: [AnyHashable: Any]?) {
+    func handleThumbnail(_ image: UIImage?, info: [AnyHashable: Any]?) {
         guard let info = info as? [String : Any] else { fatalError() }
         if let isRequestCancelled = info[PHImageCancelledKey] as? Bool, isRequestCancelled {
             return
@@ -108,12 +107,12 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
         }
     }
     
-    func handle(imageData: Data?, dataUTI: String?, orientation: UIImage.Orientation, info: [AnyHashable: Any]?) {
+    func handleImageData(_ imageData: Data?, UTI: String?, orientation: UIImage.Orientation, info: [AnyHashable: Any]?) {
         guard let info = info as? [String : Any] else { fatalError() }
         if let isRequestCancelled = info[PHImageCancelledKey] as? Bool, isRequestCancelled {
             return
         }
-        if let imageData = imageData, let uti = dataUTI {
+        if let imageData = imageData, let uti = UTI {
             guard let mimeType = UTTypeCopyPreferredTagWithClass(uti as CFString, kUTTagClassMIMEType) else { fatalError("Wrong UTI: \(uti)") }
             didLoad(data: imageData, mimeType: mimeType.takeRetainedValue() as String, cachePolicy: .allowed)
         } else {
