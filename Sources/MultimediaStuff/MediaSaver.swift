@@ -30,13 +30,10 @@ public enum ImageVariant {
         return .imageWithMetadata(image, metadata)
     }
 
-    var cgImage: CGImage {
+    var uiImage: UIImage {
         switch self {
         case .image(let image), .imageWithMetadata(let image, _):
-            if let cgImage = image.cgImage {
-                return cgImage
-            }
-            fatalError("Wrong image format")
+            return image
         }
     }
     
@@ -49,6 +46,13 @@ public enum ImageVariant {
         }
     }
     
+    var cgImage: CGImage {
+        if let cgImage = uiImage.cgImage {
+            return cgImage
+        }
+        fatalError("Wrong image format")
+    }
+    
     var ciImage: CIImage { CIImage(cgImage: cgImage, options: [CIImageOption.properties: metadata]) }
     
     var representation: CIImage.Representation { .jpeg(1.0) }
@@ -57,11 +61,12 @@ public enum ImageVariant {
 
 @available(iOS 10.0, *)
 public extension ImageVariant {
+    
     var orientation: ALAssetOrientation {
-        switch self {
-        case .image(let image), .imageWithMetadata(let image, _):
-            return image.imageOrientation as! ALAssetOrientation
+        if let orientation = ALAssetOrientation(rawValue: uiImage.imageOrientation.rawValue) {
+            return orientation
         }
+        fatalError()
     }
 }
 
@@ -132,12 +137,11 @@ public extension MediaSaver {
                     fatalError("Unexpected result")
                 }
             }
-            let library = ALAssetsLibrary()
             switch imageVariant {
             case .image(_):
-                library.writeImage(toSavedPhotosAlbum: imageVariant.cgImage, orientation: imageVariant.orientation, completionBlock: completionBlock)
+                ALAssetsLibrary().writeImage(toSavedPhotosAlbum: imageVariant.cgImage, orientation: imageVariant.orientation, completionBlock: completionBlock)
             case .imageWithMetadata(_):
-                library.writeImage(toSavedPhotosAlbum: imageVariant.cgImage, metadata: imageVariant.metadata, completionBlock: completionBlock)
+                ALAssetsLibrary().writeImage(toSavedPhotosAlbum: imageVariant.cgImage, metadata: imageVariant.metadata, completionBlock: completionBlock)
             }
         }
         return progress
