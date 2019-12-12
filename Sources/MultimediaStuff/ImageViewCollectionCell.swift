@@ -7,11 +7,17 @@
 
 import Foundation
 import UIKit
+import ViewBlocking
 
 @available(iOS 9.0, *)
 open class ImageViewCollectionCell: UICollectionViewCell {
     
-    open weak var imageLoadProgress: Progress?
+    open weak var imageLoadProgress: Progress? {
+        willSet {
+            guard let progress = newValue else { return }
+            contentView.makeActivityIndicator(style: .gray).removeFromSuperviewAfterFinish(progress)
+        }
+    }
     
     @IBOutlet open var imageView: UIImageView?
     
