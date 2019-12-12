@@ -64,6 +64,8 @@ public enum PhotoLibraryItem: MediaItem {
         }
     }
     
+    public var uti: CFString { kUTTypeImage}
+    
     public var thumbnail: URL {
         if var components = URLComponents(url: source, resolvingAgainstBaseURL: false) {
             components.fragment = PhotoLibraryURLProtocol.thumbnailFragment
