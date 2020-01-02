@@ -42,6 +42,10 @@ public final class PhotoLibraryURLProtocol: URLProtocol, URLProtocolTools {
         return scheme == PhotoLibraryURLProtocol.scheme
     }
     
+    public class override func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+    
     var assetLocalId: String {
         guard let url = request.url else { fatalError() }
         if let id = Parameter.id.get(from: url)?.value {
