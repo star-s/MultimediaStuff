@@ -94,7 +94,11 @@ open class ItemsCollectionViewController: UICollectionViewController, UICollecti
     
     open func request(at indexPath: IndexPath) -> URLRequest? {
         guard let sections = sections else { return nil }
-        return URLRequest(url: sections[indexPath.section].items[indexPath.item].thumbnail)
+        let itemsCount = sections[indexPath.section].items.count
+        if itemsCount > indexPath.item {
+            return URLRequest(url: sections[indexPath.section].items[indexPath.item].thumbnail)
+        }
+        return nil
     }
     
     public func indexPath(for item: MediaItem) -> IndexPath? {
